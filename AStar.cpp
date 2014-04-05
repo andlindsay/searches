@@ -73,7 +73,8 @@ bool AStar::DoSearch(Tree::Node* currNode)
 			deque<Tree::Node*>::iterator openListLoc = OpenListFind(findMe);
 			if (openListLoc != m_openList.end() && nextCost < (*openListLoc)->cost)
 			{
-				cout << "Found better path for node on open list\n";
+				if( m_verbose )
+					cout << "Found better path for node on open list\n";
 				// if new cost is better remove old node, add new
 				m_openList.erase(openListLoc);
 				m_searchTree->addAsChild(nextCost, findMe->vert, currNode, &m_path);
@@ -88,8 +89,9 @@ bool AStar::DoSearch(Tree::Node* currNode)
 			// if lower cost path found
 			if (nextCost < loc->second->cost)
 			{
-				cout << "Found better path for " << loc->second->vert->id << "(prev: " <<
-					loc->second->cost << " new: " << nextCost << endl;
+				if( m_verbose )
+					cout << "Found better path for " << loc->second->vert->id << "(prev: " <<
+						loc->second->cost << " new: " << nextCost << endl;
 				// fetch parent (second to last entry in path on node)
 				Graph::Vertex* parentVert =
 					*--loc->second->path.end();
@@ -126,7 +128,8 @@ bool AStar::DoSearch(Tree::Node* currNode)
 	// append to open list
 	m_openList.insert(m_openList.end(), currChildren.begin(), currChildren.end());
 	sort(m_openList.begin(), m_openList.end(), AStarCompareFunc);
-	displayOpenList();
+	if( m_verbose )
+		displayOpenList();
 
 	// mark current vertex visited
 	currNode->vert->visited = true;
@@ -140,9 +143,11 @@ bool AStar::DoSearch(Tree::Node* currNode)
 		// set path to next node's path
 		m_path = nextNode->path;
 
-		displayPath(currNode);
+		if( m_verbose )
+			displayPath(currNode);
 		// recurse on next entry in open list
-		cout << "Expanding node " << nextNode->vert->id << endl;
+		if( m_verbose )
+			cout << "Expanding node " << nextNode->vert->id << endl;
 		if (DoSearch(nextNode))
 			return true;
 	}

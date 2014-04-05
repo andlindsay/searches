@@ -13,6 +13,7 @@ public:
 		m_searchSpace(theGraph), m_end(end), m_openList(deque<Tree::Node*>()),
 		m_closedList(map<Graph::Vertex*, Tree::Node*>()), m_expansions(0)
 	{
+		m_verbose = false;
 		m_searchTree = new Tree(start);
 	}
 	// The return value of this function indicates whether a path from start to end was found.
@@ -31,8 +32,9 @@ public:
 			itr = node->path.begin();
 			enditr = node->path.end();
 		}
+		std::cout << (*itr++)->id;
 		for (; itr != enditr; ++itr)
-			std::cout << (*itr)->id << "  ";
+			std::cout << "->" << (*itr)->id;
 		std::cout << std::endl << endl;
 	}
 	void displayOpenList()
@@ -47,7 +49,7 @@ public:
 			listCopy.pop_front();
 		}
 	}
-
+	void setVerbose( bool verb ) { m_verbose = verb; }
 
 protected:
 	Graph* m_searchSpace;
@@ -58,6 +60,7 @@ protected:
 	Graph::Vertex* m_end;
 	Tree* m_searchTree;
 	int m_expansions;
+	bool m_verbose;
 };
 
 #endif
