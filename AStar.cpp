@@ -51,13 +51,11 @@ bool AStar::DoSearch(Tree::Node* currNode)
 		if ((*itr)->ends[0] == currNode->vert && !(*itr)->ends[1]->visited)
 		{
 			m_searchTree->addAsChild(nextCost, (*itr)->ends[1], currNode, &m_path);
-			(*itr)->ends[1]->visited = true;
 		}
 
 		else if (!(*itr)->ends[0]->visited)
 		{
 			m_searchTree->addAsChild(nextCost, (*itr)->ends[0], currNode, &m_path);
-			(*itr)->ends[0]->visited = true;
 		}
 		// If visited, check if better match
 		else

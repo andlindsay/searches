@@ -3,6 +3,8 @@
 #include "GreedyBestFirst.h"
 #include "AStar.h"
 
+#include <ctime>
+#include <chrono>
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -12,47 +14,10 @@ list<Graph::Edge> edges;
 bool g_bVerbose = false;
 Graph* g_pTheGraph = NULL;
 
-Graph createLineGraph()
-{
-	verts.push_back(Graph::Vertex(1, 5));
-	verts.push_back(Graph::Vertex(2, 5));
-	verts.push_back(Graph::Vertex(3, 5));
-	verts.push_back(Graph::Vertex(4, 5));
-	verts.push_back(Graph::Vertex(5, 5));
-
-	list<Graph::Vertex>::iterator itr = verts.begin();
-	do
-	{
-		Graph::Vertex *prev = &(*itr++);
-		Graph::Vertex* ends[2] = { prev, &(*itr) };
-		edges.push_back(Graph::Edge(ends, 1));
-	}
-	while(itr != --verts.end());
-
-	Graph theGraph(&verts, &edges);
-	return theGraph;
-}
-
-// three vertices with edges 1-2, 1-3
-Graph createTriangleGraph()
-{
-	verts.push_back(Graph::Vertex(1, 5));
-	verts.push_back(Graph::Vertex(2, 5));
-	verts.push_back(Graph::Vertex(3, 5));
-
-	list<Graph::Vertex>::iterator itr = ++verts.begin();
-	do
-	{
-		Graph::Vertex* ends[2] = { &(*verts.begin()), &(*itr++) };
-		edges.push_back(Graph::Edge(ends, 1));
-	} while (itr != verts.end());
-
-	Graph theGraph(&verts, &edges);
-	return theGraph;
-}
+using namespace std::chrono;
 
 // used to process input
-// NOTE: Absolutely no format checking, this is purely for testing
+// NOTE: Absolutely no format checking
 Graph createGeneralGraph(string fileName)
 {
 	verts.clear();
@@ -96,70 +61,6 @@ Graph createGeneralGraph(string fileName)
 
 	Graph theGraph(&verts, &edges);
 	return theGraph;
-}
-
-Tree::Node testNode(Graph* theGraph)
-{
-	Graph::Vertex theVert = *theGraph->getVertices()->begin();
-	Tree::Node theNode(&theVert, 0);
-	return theNode;
-}
-
-bool TestDFS(Graph* theGraph)
-{
-	Graph::Vertex* start = &(*theGraph->getVertices()->begin());
-	Graph::Vertex* end = &(*(--theGraph->getVertices()->end()));
-	DFS searcher(theGraph, start, end);
-	bool success = searcher.DoSearch();
-	if (success)
-		searcher.displayPath();
-	return success;
-}
-
-bool TestBFS(Graph* theGraph)
-{
-	Graph::Vertex* start = &(*theGraph->getVertices()->begin());
-	Graph::Vertex* end = &(*(--theGraph->getVertices()->end()));
-	BFS searcher(theGraph, start, end);
-	bool success = searcher.DoSearch();
-	if (success)
-		searcher.displayPath();
-	return success;
-}
-
-bool TestGBFS(Graph* theGraph)
-{
-	Graph::Vertex* start = &(*theGraph->getVertices()->begin());
-	Graph::Vertex* end = &(*(--theGraph->getVertices()->end()));
-	GreedyBestFirst searcher(theGraph, start, end);
-	bool success = searcher.DoSearch();
-	if (success)
-		searcher.displayPath();
-	return success;
-}
-
-bool TestAStar(Graph* theGraph)
-{
-	Graph::Vertex* start = &(*theGraph->getVertices()->begin());
-	Graph::Vertex* end = &(*(--theGraph->getVertices()->end()));
-	AStar searcher(theGraph, start, end);
-	bool success = searcher.DoSearch();
-	if (success)
-		searcher.displayPath();
-	return success;
-}
-
-// This function manually builds a tree to represent the search
-//	space of the graph returned by CreateLineGraph
-Tree createSimpleTree(Graph* theGraph)
-{
-	list<Graph::Vertex>* vertices = theGraph->getVertices();
-	list<Graph::Vertex>::iterator itr = vertices->begin();
-	Graph::Vertex theVert = *itr++;
-	Tree theTree(&theVert);
-	theVert = *itr++;
-	theTree.addAsChild(0, &theVert, theTree.getHead());
-	return theTree;
 }
 
 // reset visited to false for all vertices
@@ -234,6 +135,8 @@ void runSearch( int selection )
 		findVerts(startVert, endVert, start, end);
 	}
 	
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	
 	Search* searcher = NULL;
 	if( selection == eSearches::eDFS )
 		searcher = new DFS(g_pTheGraph, start, end);
@@ -255,7 +158,10 @@ void runSearch( int selection )
 	else
 		cout << "No path found." << endl;
 	
-	bool foundPath = TestDFS(g_pTheGraph);
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	
+	cout << "Duration: " << time_span.count() << endl;
 	
 	resetVerts();
 }
@@ -270,6 +176,19 @@ void showHelp()
 		"  9) Exit" << endl << endl;
 }
 
+void loadGraph(string filename)
+{
+	if( g_pTheGraph )
+		delete g_pTheGraph;
+	g_pTheGraph = new Graph(createGeneralGraph(filename));
+	if( g_pTheGraph )
+	{
+		cout << endl << "Results of Graph Read:" << endl;
+		cout << *g_pTheGraph << endl;
+	}
+	else
+		cout << "Failed to read graph." << endl;
+}
 
 void selectionHandler(int choice)
 {
@@ -279,16 +198,7 @@ void selectionHandler(int choice)
 		cout << "Filename: ";
 		string filename;
 		getline(cin, filename);
-		if( g_pTheGraph )
-			delete g_pTheGraph;
-		g_pTheGraph = new Graph(createGeneralGraph(filename));
-		if( g_pTheGraph )
-		{
-			cout << endl << "Results of Graph Read:" << endl;
-			cout << *g_pTheGraph << endl;
-		}
-		else
-			cout << "Failed to read graph." << endl;
+		loadGraph(filename);
 	}
 	// run a search
 	else if( choice == 2 )
@@ -316,7 +226,9 @@ void selectionHandler(int choice)
 }
 
 int main(int argc, const char* argv[])
-{	
+{
+	if(argc == 2)
+		loadGraph(string(argv[1]));
 	showHelp();
 	int selection = -1;
 	while( (selection = getOption("Selection")) != 9 )

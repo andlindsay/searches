@@ -76,19 +76,26 @@ Graph::Edge::Edge(Vertex* ends[2], int cost) : cost(cost)
 
 ostream& operator<<(ostream& stream, const Graph& obj)
 {
-	stream << "Vertices:" << obj.m_pVertices->size() << endl;
-	for (list<Graph::Vertex>::const_iterator itr = obj.m_pVertices->begin();
-		itr != obj.m_pVertices->end(); ++itr)
+	stream << "Vertices: " << obj.m_pVertices->size() << endl;
+	if( obj.m_pVertices->size() < 20 )
 	{
-		stream << "  " << itr->id << " hVal:" << itr->hVal << endl;
+		for (list<Graph::Vertex>::const_iterator itr = obj.m_pVertices->begin();
+			itr != obj.m_pVertices->end(); ++itr)
+		{
+			stream << "  " << itr->id << " hVal:" << itr->hVal << endl;
+		}
 	}
 	
-	stream << "Edges:" << obj.m_pEdges->size() << endl;
-	for (list<Graph::Edge>::const_iterator itr = obj.m_pEdges->begin();
-		itr != obj.m_pEdges->end(); ++itr)
+	stream << "Edges: " << obj.m_pEdges->size() << endl;
+	if( obj.m_pEdges->size() < 20 )
 	{
-		stream << "  " << (itr->ends[0])->id << "-" << (itr->ends[1])->id << 
-			" Cost: " << itr->cost << endl;
+		for (list<Graph::Edge>::const_iterator itr = obj.m_pEdges->begin();
+			itr != obj.m_pEdges->end(); ++itr)
+		{
+			stream << "  " << (itr->ends[0])->id << "-" << (itr->ends[1])->id << 
+				" Cost: " << itr->cost << endl;
+		}
 	}
+	
 	return stream;
 }
