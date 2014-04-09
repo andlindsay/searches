@@ -69,6 +69,17 @@ public:
 		}
 		return false;
 	}
+	void removeNode(Node &node)
+	{
+		for (list<Node>::iterator itr = m_pNodes->begin(); itr != m_pNodes->end(); ++itr)
+		{
+			if (node == *itr)
+			{
+				m_pNodes->erase(itr);
+				return;
+			}
+		}
+	}
 
 protected:
 	list<Node>* m_pNodes;

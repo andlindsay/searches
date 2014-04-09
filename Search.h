@@ -34,7 +34,9 @@ public:
 		}
 		std::cout << (*itr++)->id;
 		for (; itr != enditr; ++itr)
+		{
 			std::cout << "->" << (*itr)->id;
+		}
 		std::cout << std::endl << endl;
 	}
 	void displayOpenList()

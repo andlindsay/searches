@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import sys, getopt
 
 def generateGraph(n=100, avgNeigbors=10):
     from random import randint
@@ -9,4 +10,4 @@ def generateGraph(n=100, avgNeigbors=10):
         for m in range(avgNeigbors-randint(-avgNeigbors/2,avgNeigbors/2)):
             print "e "+str(i+1)+" "+str(randint(1,n))+" "+str(randint(1, 100))
 			
-generateGraph(50, 1)
+generateGraph(int(sys.argv[1]), int(sys.argv[2]))

@@ -4,7 +4,7 @@
 // comparison, not case sensitive.
 bool CompareFunc(const Tree::Node* first, const Tree::Node* second)
 {
-	return first->cost < second->cost;
+	return first->vert->hVal < second->vert->hVal;
 }
 
 bool GreedyBestFirst::DoSearch(Tree::Node* currNode)
@@ -32,16 +32,15 @@ bool GreedyBestFirst::DoSearch(Tree::Node* currNode)
 		// Compute cost of this path
 		int nextCost = currNode->cost + (*itr)->cost;
 
-		// Figure out which end is the start, add child accordingly if not already visited
-		if ((*itr)->ends[0] == currNode->vert && !(*itr)->ends[1]->visited)
-		{
-			m_searchTree->addAsChild(nextCost, (*itr)->ends[1], currNode, &m_path);
-		}
+		Graph::Vertex* endVert;
+		if ((*itr)->ends[0] == currNode->vert)
+			endVert = (*itr)->ends[1];
+		else
+			endVert = (*itr)->ends[0];
 
-		else if (!(*itr)->ends[0]->visited)
-		{
-			m_searchTree->addAsChild(nextCost, (*itr)->ends[0], currNode, &m_path);
-		}
+		// Figure out which end is the start, add child accordingly if not already visited
+		if (!endVert->visited)
+			m_searchTree->addAsChild(nextCost, endVert, currNode, &m_path);
 	}
 
 	// fetch children of current node
@@ -62,28 +61,29 @@ bool GreedyBestFirst::DoSearch(Tree::Node* currNode)
 	// mark current vertex visited
 	currNode->vert->visited = true;
 
-	while (!m_openList.empty())
+	Tree::Node* nextNode;
+	// get first entry in open list and remove from open list
+	do
 	{
-		Tree::Node* nextNode;
-		// get first entry in open list and remove from open list
-		do
-		{
-			nextNode = *m_openList.begin();
-			m_openList.pop_front();
-		}
-		while( nextNode->vert->visited );
-
-		// set path to next node's path
-		m_path = nextNode->path;
-
-		if( m_verbose )
-			displayPath(currNode);
-		// recurse on next entry in open list
-		if( m_verbose )
-			cout << "Expanding node " << nextNode->vert->id << endl;
-		if (DoSearch(nextNode))
-			return true;
+		if (m_openList.empty())
+			return false;
+		nextNode = *m_openList.begin();
+		m_openList.pop_front();
 	}
+	while( nextNode->vert->visited );
+
+	// set path to next node's path
+	m_path = nextNode->path;
+
+	if (m_verbose)
+	{
+		displayPath(currNode);
+		cout << "Expanding node " << nextNode->vert->id << endl;
+	}
+
+	if (DoSearch(nextNode))
+		return true;
+	
 
 	// default case, no path found
 	m_path.clear();

@@ -10,6 +10,7 @@ public:
 		Search(theGraph, start, end) {}
 
 	deque<Tree::Node*>::iterator OpenListFind(Tree::Node* find);
+	bool inPath(Graph::Vertex* vert, deque<Graph::Vertex*> path);
 	virtual bool DoSearch(Tree::Node* currNode = NULL);
 };
 
